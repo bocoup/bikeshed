@@ -55,6 +55,7 @@ def tokenizeLines(lines, numSpacesForIndentation, features=None, opaqueElements=
     rawElements = "|".join(re.escape(x) for x in opaqueElements)
 
     lineCountCorrection = 0
+    inCode = [False]
     for i, rawline in enumerate(lines):
 
         # Three kinds of "raw" elements, which prevent markdown processing inside of them.
@@ -113,12 +114,24 @@ def tokenizeLines(lines, numSpacesForIndentation, features=None, opaqueElements=
             tokens.append({'type':'raw', 'raw':'<xmp{0}>'.format(classAttr), 'prefixlen':float('inf'), 'line':i + lineCountCorrection})
             continue
 
-        match = re.search(r"^(.*?)(\\?)`(.*?)\2`(.*)$", rawline)
-        if match:
-            if match.group(2):
-                rawline = match.expand("\\1`\\3`\\4")
+        def f(match):
+            if not inCode[0]:
+                if match.group(1):
+                    return "`"
+                else:
+                    inCode[0] = match.group(2)
+                    return "<code data-opaque>"
             else:
-                rawline = match.expand("\\1<code data-opaque>\\3</code>\\4")
+                if match.group(2):
+                    if match.group(2) == inCode[0]:
+                        inCode[0] = False
+                        return "</code>"
+                    else:
+                        return match.group(2)
+                else:
+                    return match.group(1)
+
+        rawline = re.sub(r"(\\`)|(`+)", f, rawline)
 
         line = rawline.strip()
 

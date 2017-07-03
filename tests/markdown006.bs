@@ -18,6 +18,11 @@ Markup Shorthands: markdown on
 
 "code spaces": This one has `code spaces`.
 
+"code multiple": This one has `more` `than` `one`.
+
+"code newline": This one has `a
+newline character`.
+
 "code link": This one is <a href="#">in a `code link`</a>.
 
 "not code": Here's some \`literal backticks\`
@@ -35,8 +40,6 @@ this code block has tildas,
 ```
 and isn't closed by backticks
 ```
-TODO: move fixText() into the markdown handler, so it doesn't operate on raw lines;
-TODO: right now it'll make replacements in scripts, which is obviously bad :(
 ~~~
 
 
