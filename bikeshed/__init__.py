@@ -571,7 +571,7 @@ class Spec(object):
         self.head = find("head", self)
         self.body = find("body", self)
         correctH1(self)
-        undoOpaque(self, ('pre'))
+        #undoOpaque(self, ('pre'))
         processInclusions(self)
         metadata.parseDoc(self)
 
@@ -759,13 +759,7 @@ class Spec(object):
     def fixText(self, text, moreMacros={}):
         # Do several textual replacements that need to happen *before* the document is parsed as HTML.
 
-        # If markdown shorthands are on, remove all `foo`s while processing,
-        # so their contents don't accidentally trigger other stuff.
-        # Also handle markdown escapes.
-        if "markdown" in self.md.markupShorthands:
-            textFunctor = MarkdownCodeSpans(text)
-        else:
-            textFunctor = func.Functor(text)
+        textFunctor = func.Functor(text)
 
         macros = dict(self.macros, **moreMacros)
         textFunctor = textFunctor.map(curry(replaceMacros, macros=macros))
@@ -857,7 +851,7 @@ class MarkdownCodeSpans(func.Functor):
                 original = replacement["opening"] + replacement["content"] + replacement["closing"]
                 t = escapeHTML(replacement["content"]).strip(string.whitespace)
                 t = re.sub("[" + string.whitespace + "]{2,}", " ", t)
-                return "<code data-opaque='%s'>%s</code>" % (original.encode("base64"), t)
+                return "<code data-opaque>%s</code>" % (t)
             return re.sub("\ue0ff", codeSpanReviver, self.__val__)
         else:
             return self.__val__

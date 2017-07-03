@@ -7,9 +7,21 @@ from .htmlhelpers import escapeAttr
 
 
 def parse(lines, numSpacesForIndentation, features=None, opaqueElements=None, blockElements=None):
+    if opaqueElements is None:
+        opaqueElements = []
+
+    opaqueElements += ["pre", "xmp", "script", "style"]
+
+    lines = [line for line in replaceCodeSpans(lines, opaqueElements)]
+
     tokens = tokenizeLines(lines, numSpacesForIndentation, features, opaqueElements=opaqueElements, blockElements=blockElements)
+
     return parseTokens(tokens, numSpacesForIndentation)
 
+
+def replaceCodeSpans(lines, opaqueElements):
+    for i, rawline in enumerate(lines):
+        yield rawline
 
 def tokenizeLines(lines, numSpacesForIndentation, features=None, opaqueElements=None, blockElements=None):
     # Turns lines of text into block tokens,
@@ -40,9 +52,6 @@ def tokenizeLines(lines, numSpacesForIndentation, features=None, opaqueElements=
 
     tokens = []
     rawStack = []
-    if opaqueElements is None:
-    	opaqueElements = []
-    opaqueElements += ["pre", "xmp", "script", "style"]
     rawElements = "|".join(re.escape(x) for x in opaqueElements)
 
     lineCountCorrection = 0
@@ -86,6 +95,7 @@ def tokenizeLines(lines, numSpacesForIndentation, features=None, opaqueElements=
                 nest = match.group(1) not in ["xmp", "script", "style"]
                 rawStack.append({'type':'element', 'tag':"</{0}>".format(match.group(1)), 'nest':nest})
             continue
+
         if rawStack:
             tokens.append({'type':'raw', 'raw':rawline, 'prefixlen':float('inf'), 'line':i + lineCountCorrection})
             continue
@@ -103,7 +113,15 @@ def tokenizeLines(lines, numSpacesForIndentation, features=None, opaqueElements=
             tokens.append({'type':'raw', 'raw':'<xmp{0}>'.format(classAttr), 'prefixlen':float('inf'), 'line':i + lineCountCorrection})
             continue
 
+        match = re.search(r"^(.*?)(\\?)`(.*?)\2`(.*)$", rawline)
+        if match:
+            if match.group(2):
+                rawline = match.expand("\\1`\\3`\\4")
+            else:
+                rawline = match.expand("\\1<code data-opaque>\\3</code>\\4")
+
         line = rawline.strip()
+
         match = re.match("<!--line count correction (-?\d+)-->", line)
         if match:
             # Previous edits changed the number of lines
