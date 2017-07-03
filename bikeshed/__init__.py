@@ -571,6 +571,7 @@ class Spec(object):
         self.head = find("head", self)
         self.body = find("body", self)
         correctH1(self)
+        undoOpaque(self, ('pre'))
         processInclusions(self)
         metadata.parseDoc(self)
 
@@ -802,6 +803,7 @@ class MarkdownCodeSpans(func.Functor):
     def __init__(self, text):
         self.__codeSpanReplacements__ = []
         newText = ""
+        origText = ""
         mode = "text"
         indexSoFar = 0
         escapeLen = 0
@@ -812,6 +814,7 @@ class MarkdownCodeSpans(func.Functor):
                     indexSoFar = m.end()
                 elif m.group(2):
                     mode = "code"
+                    opening = m.group(2)
                     newText += text[indexSoFar:m.start()]
                     indexSoFar = m.end()
                     escapeLen = len(m.group(2))
@@ -823,7 +826,11 @@ class MarkdownCodeSpans(func.Functor):
                         pass
                     else:
                         mode = "text"
-                        self.__codeSpanReplacements__.append(text[indexSoFar:m.start()])
+                        self.__codeSpanReplacements__.append({
+                            "opening": opening,
+                            "content": text[indexSoFar:m.start()],
+                            "closing": m.group(2)
+                        })
                         newText += "\ue0ff"
                         indexSoFar = m.end()
         if mode == "text":
@@ -846,9 +853,11 @@ class MarkdownCodeSpans(func.Functor):
                 # Instead, sub back the replacement in order,
                 # massaged per the Commonmark rules.
                 import string
-                t = escapeHTML(repls.pop()).strip(string.whitespace)
+                replacement = repls.pop()
+                original = replacement["opening"] + replacement["content"] + replacement["closing"]
+                t = escapeHTML(replacement["content"]).strip(string.whitespace)
                 t = re.sub("[" + string.whitespace + "]{2,}", " ", t)
-                return "<code data-opaque>" + t + "</code>"
+                return "<code data-opaque='%s'>%s</code>" % (original.encode("base64"), t)
             return re.sub("\ue0ff", codeSpanReviver, self.__val__)
         else:
             return self.__val__
@@ -2186,6 +2195,14 @@ def correctH1(doc):
     h1s = [h1 for h1 in findAll("h1", doc) if isNormative(h1)]
     if len(h1s) == 2:
         replaceNode(h1s[0], h1s[1])
+
+
+def undoOpaque(doc, opaqueTags):
+    for el in findAll("[data-opaque]", doc):
+        if hasAncestor(el, lambda ancestor: ancestor.tag in opaqueTags):
+            replaceNode(el, el.get('data-opaque').decode('base64'))
+        else:
+            el.set('data-opaque', '')
 
 
 def processInclusions(doc):
