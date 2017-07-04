@@ -106,7 +106,7 @@ def tokenizeLines(lines, numSpacesForIndentation, features=None, opaqueElements=
             continue
 
 
-        rawline, inCode = replaceCodeSpans(rawline, inCode)
+        #rawline, inCode = replaceCodeSpans(rawline, inCode)
 
         line = rawline.strip()
         match = re.match("<!--line count correction (-?\d+)-->", line)

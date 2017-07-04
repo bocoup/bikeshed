@@ -20,9 +20,6 @@ Markup Shorthands: markdown on
 
 "code multiple": This one has `more` `than` `one`.
 
-"code newline": This one has `a
-newline character`.
-
 "code link": This one is <a href="#">in a `code link`</a>.
 
 "not code": Here's some \`literal backticks\`

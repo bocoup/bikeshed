@@ -245,6 +245,13 @@ def transformAutolinkShortcuts(doc):
     def strongReplacer(match):
         return E.strong(match.group(2))
 
+    codeRe = re.compile(r"(?<!`)(\\?)(`+)(?!\s)(.*?[^`])(?!\s)(\\?)(\2)(?!`)")
+
+    def codeReplacer(match):
+        if match.group(1) != "":
+            return match.expand("\\2\\3\\5")
+        return E.code(match.group(3))
+
     emRe = re.compile(r"(?<!\\)(\*)(?!\s)([^*]+)(?!\s)(?<!\\)\*")
 
     def emReplacer(match):
@@ -286,6 +293,7 @@ def transformAutolinkShortcuts(doc):
             config.processTextNodes(nodes, varRe, varReplacer)
         if "markdown" in doc.md.markupShorthands:
             config.processTextNodes(nodes, inlineLinkRe, inlineLinkReplacer)
+            config.processTextNodes(nodes, codeRe, codeReplacer)
             config.processTextNodes(nodes, strongRe, strongReplacer)
             config.processTextNodes(nodes, emRe, emReplacer)
             config.processTextNodes(nodes, escapedRe, escapedReplacer)
