@@ -1,9 +1,30 @@
-<html
- lang="en"><head>
+<!doctype html><html lang="en">
+ <head>
   <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
   <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
   <title>Foo</title>
   <link href="http://example.com/foo" rel="canonical">
+<style>
+/*
+Fragment {#fragment}
+========
+
+This text has *emphasis*; this text is **strong**; this text is `code`. This
+text is [a link]().
+
+- a list
+- with dashes
+
+* a list
+* with asterisks
+
+```
+fenced
+ code
+  block
+```
+*/
+</style>
 <style>/* style-md-lists */
 
             /* This is a weird hack for me not yet following the commonmark spec
@@ -151,7 +172,7 @@
             [data-link-type=biblio] {
                 white-space: pre;
             }</style>
- </head><body class="h-entry">
+ <body class="h-entry">
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1>Foo</h1>
@@ -159,16 +180,16 @@
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
-     </dt><dd><a href="http://example.com/foo" class="u-url">http://example.com/foo</a>
-     </dd><dt class="editor">Editor:
-     </dt><dd class="editor p-author h-card vcard"><span class="p-name fn">Example Editor</span>
-    </dd></dl>
+     <dd><a class="u-url" href="http://example.com/foo">http://example.com/foo</a>
+     <dt class="editor">Editor:
+     <dd class="editor p-author h-card vcard"><span class="p-name fn">Example Editor</span>
+    </dl>
    </div>
    <div data-fill-with="warning"></div>
-   <p data-fill-with="copyright" class="copyright">COPYRIGHT GOES HERE </p>
+   <p class="copyright" data-fill-with="copyright">COPYRIGHT GOES HERE </p>
    <hr title="Separator for header">
   </div>
-  <div data-fill-with="abstract" class="p-summary">
+  <div class="p-summary" data-fill-with="abstract">
    <h2 class="no-num no-toc no-ref heading settled" id="abstract"><span class="content">Abstract</span></h2>
    <p>Test of markdown inline link constructs</p>
   </div>
@@ -195,5 +216,43 @@ fenced
   block
 ```
 </pre>
+<pre>Fragment {#fragment}
+========
+
+This text has *emphasis*; this text is **strong**; this text is `code`. This
+text is [a link]().
+
+- a list
+- with dashes
+
+* a list
+* with asterisks
+
+```
+fenced
+ code
+  block
+```
+</pre>
+<script>
+/*
+Fragment {#fragment}
+========
+
+This text has *emphasis*; this text is **strong**; this text is `code`. This
+text is [a link]().
+
+- a list
+- with dashes
+
+* a list
+* with asterisks
+
+```
+fenced
+ code
+  block
+```
+*/
+</script>
   </main>
-</body></html>

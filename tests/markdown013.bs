@@ -31,3 +31,67 @@ fenced
   block
 ```
 </pre>
+
+<xmp>
+Fragment {#fragment}
+========
+
+This text has *emphasis*; this text is **strong**; this text is `code`. This
+text is [a link]().
+
+- a list
+- with dashes
+
+* a list
+* with asterisks
+
+```
+fenced
+ code
+  block
+```
+</xmp>
+
+<script>
+/*
+Fragment {#fragment}
+========
+
+This text has *emphasis*; this text is **strong**; this text is `code`. This
+text is [a link]().
+
+- a list
+- with dashes
+
+* a list
+* with asterisks
+
+```
+fenced
+ code
+  block
+```
+*/
+</script>
+
+<style>
+/*
+Fragment {#fragment}
+========
+
+This text has *emphasis*; this text is **strong**; this text is `code`. This
+text is [a link]().
+
+- a list
+- with dashes
+
+* a list
+* with asterisks
+
+```
+fenced
+ code
+  block
+```
+*/
+</style>
