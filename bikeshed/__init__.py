@@ -571,7 +571,6 @@ class Spec(object):
         self.head = find("head", self)
         self.body = find("body", self)
         correctH1(self)
-        #undoOpaque(self, ('pre'))
         processInclusions(self)
         metadata.parseDoc(self)
 
@@ -787,74 +786,6 @@ class Spec(object):
         return False
 
 config.specClass = Spec
-
-
-class MarkdownCodeSpans(func.Functor):
-    # Wraps a string, such that the contained text is "safe"
-    # and contains no markdown code spans.
-    # Thus, functions mapping over the text can freely make substitutions,
-    # knowing they won't accidentally replace stuff in a code span.
-    def __init__(self, text):
-        self.__codeSpanReplacements__ = []
-        newText = ""
-        origText = ""
-        mode = "text"
-        indexSoFar = 0
-        escapeLen = 0
-        for m in re.finditer(r"(\\`)|(`+)", text):
-            if mode == "text":
-                if m.group(1):
-                    newText += text[indexSoFar:m.start()] + m.group(1)[1]
-                    indexSoFar = m.end()
-                elif m.group(2):
-                    mode = "code"
-                    opening = m.group(2)
-                    newText += text[indexSoFar:m.start()]
-                    indexSoFar = m.end()
-                    escapeLen = len(m.group(2))
-            elif mode == "code":
-                if m.group(1):
-                    pass
-                elif m.group(2):
-                    if len(m.group(2)) != escapeLen:
-                        pass
-                    else:
-                        mode = "text"
-                        self.__codeSpanReplacements__.append({
-                            "opening": opening,
-                            "content": text[indexSoFar:m.start()],
-                            "closing": m.group(2)
-                        })
-                        newText += "\ue0ff"
-                        indexSoFar = m.end()
-        if mode == "text":
-            newText += text[indexSoFar:]
-        elif mode == "code":
-            newText += "`"*escapeLen + text[indexSoFar:]
-        self.__val__ = newText
-
-    def map(self, fn):
-        x = MarkdownCodeSpans("")
-        x.__val__ = fn(self.__val__)
-        x.__codeSpanReplacements__ = self.__codeSpanReplacements__
-        return x
-
-    def extract(self):
-        if self.__codeSpanReplacements__:
-            repls = self.__codeSpanReplacements__[::-1]
-            def codeSpanReviver(_):
-                # Match object is the PUA character, which I can ignore.
-                # Instead, sub back the replacement in order,
-                # massaged per the Commonmark rules.
-                import string
-                replacement = repls.pop()
-                original = replacement["opening"] + replacement["content"] + replacement["closing"]
-                t = escapeHTML(replacement["content"]).strip(string.whitespace)
-                t = re.sub("[" + string.whitespace + "]{2,}", " ", t)
-                return "<code data-opaque>%s</code>" % (t)
-            return re.sub("\ue0ff", codeSpanReviver, self.__val__)
-        else:
-            return self.__val__
 
 
 def stripBOM(doc):
@@ -2189,14 +2120,6 @@ def correctH1(doc):
     h1s = [h1 for h1 in findAll("h1", doc) if isNormative(h1)]
     if len(h1s) == 2:
         replaceNode(h1s[0], h1s[1])
-
-
-def undoOpaque(doc, opaqueTags):
-    for el in findAll("[data-opaque]", doc):
-        if hasAncestor(el, lambda ancestor: ancestor.tag in opaqueTags):
-            replaceNode(el, el.get('data-opaque').decode('base64'))
-        else:
-            el.set('data-opaque', '')
 
 
 def processInclusions(doc):

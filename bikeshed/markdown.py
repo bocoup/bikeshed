@@ -46,7 +46,6 @@ def tokenizeLines(lines, numSpacesForIndentation, features=None, opaqueElements=
     rawElements = "|".join(re.escape(x) for x in opaqueElements)
 
     lineCountCorrection = 0
-    inCode = False
     for i, rawline in enumerate(lines):
 
         # Three kinds of "raw" elements, which prevent markdown processing inside of them.
@@ -105,8 +104,6 @@ def tokenizeLines(lines, numSpacesForIndentation, features=None, opaqueElements=
             tokens.append({'type':'raw', 'raw':'<xmp{0}>'.format(classAttr), 'prefixlen':float('inf'), 'line':i + lineCountCorrection})
             continue
 
-
-        #rawline, inCode = replaceCodeSpans(rawline, inCode)
 
         line = rawline.strip()
         match = re.match("<!--line count correction (-?\d+)-->", line)
@@ -172,31 +169,6 @@ def tokenizeLines(lines, numSpacesForIndentation, features=None, opaqueElements=
         #print (" " * (11 - len(token['type']))) + token['type'] + ": " + token['raw'],
 
     return tokens
-
-
-def replaceCodeSpans(line, inCode):
-    inCodeBox = [inCode]
-
-    def replacer(match):
-        if not inCodeBox[0]:
-            if match.group(1):
-                return "`"
-            else:
-                inCodeBox[0] = match.group(2)
-                return "<code data-opaque>"
-        else:
-            if match.group(2):
-                if match.group(2) == inCodeBox[0]:
-                    inCodeBox[0] = False
-                    return "</code>"
-                else:
-                    return match.group(2)
-            else:
-                return match.group(1)
-
-    replaced = re.sub(r"(\\`)|(`+)", replacer, line)
-
-    return replaced, inCodeBox[0]
 
 
 def stripComments(lines):
