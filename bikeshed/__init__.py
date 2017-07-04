@@ -758,7 +758,13 @@ class Spec(object):
     def fixText(self, text, moreMacros={}):
         # Do several textual replacements that need to happen *before* the document is parsed as HTML.
 
-        textFunctor = func.Functor(text)
+        # If markdown shorthands are on, remove all `foo`s while processing,
+        # so their contents don't accidentally trigger other stuff.
+        # Also handle markdown escapes.
+        if "markdown" in self.md.markupShorthands:
+            textFunctor = MarkdownCodeSpans(text)
+        else:
+            textFunctor = func.Functor(text)
 
         macros = dict(self.macros, **moreMacros)
         textFunctor = textFunctor.map(curry(replaceMacros, macros=macros))
@@ -786,6 +792,61 @@ class Spec(object):
         return False
 
 config.specClass = Spec
+
+
+class MarkdownCodeSpans(func.Functor):
+    # Wraps a string, such that the contained text is "safe"
+    # and contains no markdown code spans.
+    # Thus, functions mapping over the text can freely make substitutions,
+    # knowing they won't accidentally replace stuff in a code span.
+    def __init__(self, text):
+        self.__codeSpanReplacements__ = []
+        newText = ""
+        mode = "text"
+        indexSoFar = 0
+        escapeLen = 0
+        for m in re.finditer(r"(\\`)|(`+)", text):
+            if mode == "text":
+                if m.group(1):
+                    newText += text[indexSoFar:m.end()]
+                    indexSoFar = m.end()
+                elif m.group(2):
+                    mode = "code"
+                    newText += text[indexSoFar:m.start()]
+                    indexSoFar = m.start()
+                    escapeLen = len(m.group(2))
+            elif mode == "code":
+                if m.group(1):
+                    pass
+                elif m.group(2):
+                    if len(m.group(2)) != escapeLen:
+                        pass
+                    else:
+                        mode = "text"
+                        self.__codeSpanReplacements__.append(text[indexSoFar:m.end()])
+                        newText += "\ue0ff"
+                        indexSoFar = m.end()
+
+        newText += text[indexSoFar:]
+
+        self.__val__ = newText
+
+    def map(self, fn):
+        x = MarkdownCodeSpans("")
+        x.__val__ = fn(self.__val__)
+        x.__codeSpanReplacements__ = self.__codeSpanReplacements__
+        return x
+
+    def extract(self):
+        if self.__codeSpanReplacements__:
+            repls = self.__codeSpanReplacements__[::-1]
+            def codeSpanReviver(_):
+                # Match object is the PUA character, which I can ignore.
+                # Instead, sub back the replacement in order.
+                return repls.pop()
+            return re.sub("\ue0ff", codeSpanReviver, self.__val__)
+        else:
+            return self.__val__
 
 
 def stripBOM(doc):

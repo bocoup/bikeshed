@@ -16,7 +16,11 @@ Markup Shorthands: markdown on
 
 "code2": This is `code2`.
 
+"code text": This one has `an apostrophe ' which might be tempting to replace`.
+
 "code spaces": This one has `code spaces`.
+
+"code spaces collapsed": This one has `many  code    spaces`.
 
 "code multiple": This one has `more` `than` `one`.
 

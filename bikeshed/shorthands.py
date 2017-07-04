@@ -248,9 +248,18 @@ def transformAutolinkShortcuts(doc):
     codeRe = re.compile(r"(?<!`)(\\?)(`+)(?!\s)(.*?[^`])(?!\s)(\\?)(\2)(?!`)")
 
     def codeReplacer(match):
+        # This condition represents an escaped backtick. Substitute the string
+        # without the escaping character.
         if match.group(1) != "":
             return match.expand("\\2\\3\\5")
-        return E.code(match.group(3))
+
+        # CommonMark specifies the following transformation for the text
+        # content of inline code
+        import string
+        normalized = escapeHTML(match.group(3)).strip(string.whitespace)
+        normalized = re.sub("[" + string.whitespace + "]{2,}", " ", normalized)
+
+        return E.code(normalized)
 
     emRe = re.compile(r"(?<!\\)(\*)(?!\s)([^*]+)(?!\s)(?<!\\)\*")
 
