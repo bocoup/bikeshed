@@ -1132,6 +1132,17 @@ Header 1 {#header1}
 ### Header 2 ### {#header2}
 ```
 
+This syntax is also honored for ordered list items, supporting intra-document
+algorithm step references:
+
+```
+1. First
+2. Second {#important}
+3. Third
+```
+
+See [[#section-links]] for more detail.
+
 More of Markdown will be supported in the future,
 as I get closer to adhering to the CommonMark specification.
 
@@ -1183,7 +1194,7 @@ or `{{foo}}` to link to an IDL construct.
 These are documented in [[#autolinking]].
 
 Other types of linking shorthand also exist,
-such as `[[#foo]]` to link to sections of a spec
+such as `[[#foo]]` to link to sections or algorithm steps in a spec
 (documented in [[#section-links]]),
 or `[[FOO]]` to link to generate and link to bibliography entries
 (documented in [[#biblio]]).
@@ -2059,6 +2070,23 @@ as they're often linked to.
 Also, the section titles are often long and annoying to type,
 and they move around,
 so numbering isn't stable.
+
+This syntax can also be used to generate references to specific algorithm
+steps. Given an algorithm named "Foobar" with the following steps:
+
+```html
+<ol>
+  <li>First
+  <li id="important">Second
+  <li>Third
+</ol>
+```
+
+The text `According to [[#important]].` will render as:
+
+```html
+According to  <a href="#important">step 3 of the "Foobar" algorithm</a>.
+```
 
 You can also use **cross-spec** section links,
 as long as the spec is either in Bikeshed's linking database,

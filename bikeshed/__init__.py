@@ -1006,11 +1006,16 @@ def fixIntraDocumentReferences(doc):
             die("Couldn't find target anchor {0}:\n{1}", targetID, outerHTML(el), el=el)
             continue
         if isEmpty(el):
-            # TODO Allow this to respect "safe" markup (<sup>, etc) in the title
             target = ids[targetID]
             if target.tag == "li":
+                targetAlgo = closestAncestor(target, lambda el: el.get('data-algorithm'))
+                localAlgo = closestAncestor(el, lambda el: el.get('data-algorithm'))
                 text = "step " + ".".join(map(lambda x: str(x+1), listOffsets(target)))
+                if localAlgo is not targetAlgo:
+                    text += " of the \"%s\" algorithm" % targetAlgo.get("data-algorithm")
             else:
+                # TODO Allow this to respect "safe" markup (<sup>, etc) in the
+                # title
                 content = find(".content", target)
 
                 if content is None:
