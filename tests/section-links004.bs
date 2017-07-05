@@ -14,19 +14,20 @@ Date: 1970-01-01
 <div algorithm>
   <dfn>Sandwhich</dfn>
 
-  <ol>
-    <li>Plate</li>
-    <li id="foundation">Bread</li>
-    <li>Perform these substeps in parallel:
-      <ol>
-        <li id="protein">Cheese</li>
-        <li>Lettuce</li>
-      </ol>
-    </li>
-    <li>Napkin</li>
-  </ol>
+    1. Plate
+    1. If you are hungry, then:
+       1. Bread {#foundation}
+       1. Perform these substeps in parallel:
+          1. Cheese {#protein}
+          1. Lettuce
+       1. Bread
+    1. Napkin
 </div>
 
 <div>
+  ## Heading
   Don't forget about [[#foundation]] and [[#protein]].
+
+  Insert text here: <a algorithm-step href="#foundation"></a>,
+  but <a algorithm-step href="#foundation">keep this text, please.</a>
 </div>

@@ -134,6 +134,14 @@ def tokenizeLines(lines, numSpacesForIndentation, features=None, opaqueElements=
         elif re.match(r"-?\d+\.\s", line):
             match = re.match(r"(-?\d+)\.\s+(.*)", line)
             token = {'type':'numbered', 'text': match.group(2), 'raw':rawline, 'num': int(match.group(1))}
+
+            # This syntax is inspired by the Markdown Extra extension for
+            # headings. It is extended to numbered list items in order to allow
+            # for succinct naming of algorithm steps.
+            match = re.search(r"\{#([^ }]+)\}\s*$", line)
+            if match:
+                token['text'] = token['text'][:-1 * len(match.group())]
+                token['id'] = match.group(1)
         elif re.match(r"-?\d+\.$", line):
             token = {'type':'numbered', 'text': "", 'raw':rawline, 'num': int(line[:-1])}
         elif re.match(r"[*+-]\s", line):
@@ -429,6 +437,7 @@ def parseNumbered(stream, start=1):
         # Remove the numbered part from the line
         firstLine = stream.currtext() + "\n"
         lines = [firstLine]
+
         while True:
             stream.advance()
             # All the conditions that indicate we're *past* the end of the item.
@@ -454,14 +463,18 @@ def parseNumbered(stream, start=1):
                 return
             if stream.currtype() == 'blank':
                 stream.advance()
-            yield parseItem(stream)
+            yield (stream.currid() if "id" in stream.curr() else None), parseItem(stream)
 
     if start == 1:
         lines = ["<ol data-md>"]
     else:
         lines = ["<ol data-md start='{0}'>".format(start)]
-    for li_lines in getItems(stream):
-        lines.append("<li data-md>")
+    for domID, li_lines in getItems(stream):
+        if domID is not None:
+            idattr = " id='{0}'".format(domID)
+        else:
+            idattr = ""
+        lines.append("<li data-md%s>" % idattr)
         lines.extend(parse(li_lines, numSpacesForIndentation))
         lines.append("</li>")
     lines.append("</ol>")

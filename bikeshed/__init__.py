@@ -900,6 +900,8 @@ def canonicalizeShortcuts(doc):
         "link-type":"data-link-type",
         "force":"data-dfn-force",
         "section":"data-section",
+        "section-or-step":"data-section-or-step",
+        "algorithm-step":"data-algorithm-step",
         "attribute-info":"data-attribute-info",
         "dict-member-info":"data-dict-member-info",
         "lt":"data-lt",
@@ -991,8 +993,14 @@ def fixIntraDocumentReferences(doc):
     stepIDs = {el.get('id'):el for el in findAll("[data-algorithm] li[id]", doc)}
     for el in findAll("a[href^='#']:not([href='#']):not(.self-link):not([data-link-type])", doc):
         targetID = el.get("href")[1:]
-        if el.get('data-section') is not None and targetID not in headingIDs and targetID not in stepIDs:
+        if el.get('data-section') is not None and targetID not in headingIDs:
             die("Couldn't find target document section {0}:\n{1}", targetID, outerHTML(el), el=el)
+            continue
+        elif el.get('data-algorithm-step') is not None and targetID not in stepIDs:
+            die("Couldn't find target algorithm step {0}:\n{1}", targetID, outerHTML(el), el=el)
+            continue
+        elif el.get('data-section-or-step') is not None and targetID not in headingIDs and targetID not in stepIDs:
+            die("Couldn't find document section or algorithm step with ID {0}:\n{1}", targetID, outerHTML(el), el=el)
             continue
         elif targetID not in ids:
             die("Couldn't find target anchor {0}:\n{1}", targetID, outerHTML(el), el=el)
@@ -2137,6 +2145,8 @@ def cleanupHTML(doc):
             removeAttr(el, 'data-link-status')
             removeAttr(el, 'data-link-spec')
             removeAttr(el, 'data-section')
+            removeAttr(el, 'data-section-or-step')
+            removeAttr(el, 'data-algorithm-step')
             removeAttr(el, 'data-biblio-type')
             removeAttr(el, 'data-biblio-status')
             removeAttr(el, 'data-okay-to-fail')

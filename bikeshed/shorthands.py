@@ -137,7 +137,7 @@ def transformAutolinkShortcuts(doc):
             linkText = linkText[1:]
         if spec is None:
             # local section link
-            return E.a({"section":"", "href":section}, linkText)
+            return E.a({"section-or-step":"", "href":section}, linkText)
         elif justPage is not None:
             # foreign link, to an actual page from a multipage spec
             return E.span({"spec-section":justPage + "#", "spec":spec}, linkText)
