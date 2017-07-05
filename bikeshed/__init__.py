@@ -988,9 +988,10 @@ def checkVarHygiene(doc):
 def fixIntraDocumentReferences(doc):
     ids = {el.get('id'):el for el in findAll("[id]", doc)}
     headingIDs = {el.get('id'):el for el in findAll("[id].heading", doc)}
+    stepIDs = {el.get('id'):el for el in findAll("[data-algorithm] li[id]", doc)}
     for el in findAll("a[href^='#']:not([href='#']):not(.self-link):not([data-link-type])", doc):
         targetID = el.get("href")[1:]
-        if el.get('data-section') is not None and targetID not in headingIDs:
+        if el.get('data-section') is not None and targetID not in headingIDs and targetID not in stepIDs:
             die("Couldn't find target document section {0}:\n{1}", targetID, outerHTML(el), el=el)
             continue
         elif targetID not in ids:
@@ -999,11 +1000,15 @@ def fixIntraDocumentReferences(doc):
         if isEmpty(el):
             # TODO Allow this to respect "safe" markup (<sup>, etc) in the title
             target = ids[targetID]
-            content = find(".content", target)
-            if content is None:
-                die("Tried to generate text for a section link, but the target isn't a heading:\n{0}", outerHTML(el), el=el)
-                continue
-            text = textContent(content).strip()
+            if target.tag == "li":
+                text = "step " + ".".join(map(lambda x: str(x+1), listOffsets(target)))
+            else:
+                content = find(".content", target)
+
+                if content is None:
+                    die("Tried to generate text for a section link, but the target isn't a heading:\n{0}", outerHTML(el), el=el)
+                    continue
+                text = textContent(content).strip()
             if target.get('data-level') is not None:
                 text = "§{1} {0}".format(text, target.get('data-level'))
             appendChild(el, text)

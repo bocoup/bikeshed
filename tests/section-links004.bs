@@ -1,0 +1,32 @@
+<h1>Algorithm Step Links</h1>
+
+<pre class=metadata>
+Group: test
+Shortname: foo
+Level: 1
+Status: LS
+ED: http://example.com/foo
+Abstract: Section links are awesome.
+Editor: Example Editor
+Date: 1970-01-01
+</pre>
+
+<div algorithm>
+  <dfn>Sandwhich</dfn>
+
+  <ol>
+    <li>Plate</li>
+    <li id="foundation">Bread</li>
+    <li>Perform these substeps in parallel:
+      <ol>
+        <li id="protein">Cheese</li>
+        <li>Lettuce</li>
+      </ol>
+    </li>
+    <li>Napkin</li>
+  </ol>
+</div>
+
+<div>
+  Don't forget about [[#foundation]] and [[#protein]].
+</div>

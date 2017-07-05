@@ -109,6 +109,18 @@ def foldWhitespace(text):
     return re.sub(r"(\s|\xa0)+", " ", text)
 
 
+def listOffsets(el):
+    parent = parentElement(el)
+    grandParent = parentElement(parent)
+    siblingSteps = [step for step in childElements(parent) if step.tag == "li"]
+    offsets = [siblingSteps.index(el)]
+
+    if grandParent.tag == "li":
+        offsets[:0] = listOffsets(grandParent)
+
+    return offsets
+
+
 def parseHTML(text):
     doc = html5lib.parse(text, treebuilder='lxml', namespaceHTMLElements=False)
     head = doc.getroot()[0]
